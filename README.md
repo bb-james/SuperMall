@@ -2,9 +2,10 @@
 # SupeMall
 用 vue-cli搭建的Vue商城项目
 接口已隐藏
+部分未完成
 
 =======
-# tabar
+# SuperMall
 
 ## Project setup
 ```
