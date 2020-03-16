@@ -1,7 +1,5 @@
 <<<<<<< HEAD
-# SupeMall
-用 vue-cli搭建的Vue商城项目
-接口已隐藏
+# SupeMal
 部分未完成
 
 =======
