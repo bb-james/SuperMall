@@ -1,6 +1,6 @@
  const state = {
     cartgoods:[], //加入购物车的商品
-    LoginId: ''   //登陆时的ID
+    User: {}   //登陆信息
 }
 
 export default state

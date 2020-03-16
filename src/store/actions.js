@@ -1,4 +1,7 @@
-const actions = {
+
+
+const actions = {    
+    ///购物车添加商品
     addcart({state,commit},info) {
        let oldinfo = state.cartgoods.find(item => item.iid === info.iid) 
        //商品存在
@@ -15,10 +18,14 @@ const actions = {
        console.log(state.cartgoods);
        
     },
-    GetLoginid({state,commit},ID) {
-        if (!state.LoginId) {
-            state.LoginId = ID
-        }
+    //获取用户信息(用户名，登陆ID)
+    GetLoginUser({state,commit},result) {
+       commit('ReceiveUser',result)
+        // if (!state.user) {
+        //     state.user = result
+        //     console.log( state.user);
+            
+        // }
         
     }
     

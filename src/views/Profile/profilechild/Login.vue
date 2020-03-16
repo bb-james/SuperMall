@@ -10,7 +10,7 @@
          <form >
            <div :class="{'on':!isActive}">
              <section class="input-content">
-                <input type="tel" :class="{'border-blur':rules[0].Phone.isBlur}" maxlength="11" placeholder="手机号" 
+                <input type="tel" :class="{'border-blur':rules[1].Phone.isBlur}" maxlength="11" placeholder="绑定手机号码" 
                       v-model="phone"  @blur="CheckPhone(phone,11)"     
                       ref="phone"> 
               <p class="errMassage" >{{phoneMass}}</p>   
@@ -21,18 +21,18 @@
              
              <div>
               <section class="input-content">
-               <input type="tel" maxlength="8" placeholder="验证码" v-model="code" >
+               <input type="tel" maxlength="8" placeholder="验证码" v-model="captcha" >
              </section></div> 
            </div>
            <div :class="{'on':isActive}">
-             <section class="input-content">
-               <input type="tel" :class="{'border-blur':rules[0].Phone.isBlur}" maxlength="11" placeholder="手机号" 
+             <!-- <section class="input-content">
+               <input type="tel" :class="{'border-blur':rules[0].Phone.isBlur}" maxlength="11" placeholder="绑定手机号码" 
                       v-model="phone"  @blur="CheckPhone(phone,11)"     
                       ref="phone"> 
               <p class="errMassage" >{{phoneMass}}</p>             
-             </section>
+             </section> -->
              <section class="input-content">              
-               <input type="text" :class="{'border-blur': rules[0].User.isBlur}" maxlength="6" placeholder="昵称" 
+               <input type="text" :class="{'border-blur': rules[0].User.isBlur}" maxlength="6" placeholder="用户名账号"
                       v-model="user_name"  @blur="CheckUser(user_name,11)"     
                      ref="user"> 
                <p class="errMassage" >{{user_nameMass}}</p>
@@ -45,7 +45,18 @@
                       v-model="password"  @blur="CheckPass(password,11)"     
                       ref='password'> 
                <p class="errMassage" >{{passMass}}</p>   
-             </section></div>              
+             </section></div>
+             <div>
+              <section class="input-content">
+               <input type="text" :class="{'border-blur': rules[0].Captcha.isBlur}" maxlength="4" minlength='4' placeholder="验证码" 
+                      v-model="captcha"  @blur=" CheckCaptcha(captcha)"    
+                      ref='password'> 
+               <p class="errMassage" >{{captchaMass}}</p> 
+               <div>
+                 <img  class='size-cap' ref='captcha' src="http://localhost:3000/captcha" alt="换一下" @click.prevent=SwitchCaptcha()> 
+               </div>
+                 
+             </section></div>                  
            </div>  
           <button class="submit-button" @click.prevent="submitLogin(user_name)">登陆</button>
           <a href="javascript:" class="about-us">关于我们</a>        
@@ -57,6 +68,8 @@
 
 <script>
 import { MessageBox } from 'mint-ui';
+import { reqpwdlogin} from '@/network/loguser.js'
+import ajax from '../../../network/ajax';
 
 export default {
 //import引入的组件需要注入到对象中才能使用
@@ -66,16 +79,20 @@ return {
   isActive: true,
   phone: '',
   password:'',
-  code: '',
+  captcha: '',
   computedTime: 0,
   user_name: '',
   phoneMass: '',
   user_nameMass: '',
+  captchaMass:'',
   passMass: '',
-  rules:[{ Phone:{ massage: ['请输入手机号码','请输入正确的手机号码'], isBlur: false, requires: false},
+  rules:[{   
            User:{ massage: ['请输入昵称','不能超过6位数'], isBlur: false, requires: false},
-           Pass: {massage: ['请输入密码','不能超过6位数'], isBlur: false, requires: false}
-           }]
+           Pass: {massage: ['请输入密码','不能超过6位数'], isBlur: false, requires: false},
+           Captcha:{massage:['请输入验证码','验证码错误'], isBlur: false, requires: false}
+           },
+           {Phone:{ massage: ['请输入手机号码','请输入正确的手机号码'], isBlur: false, requires: false},}
+           ]
   }
 },
 //监听属性 类似于data概念
@@ -104,21 +121,37 @@ methods: {
         // 停止计时
         if(this.computedTime<=0) clearInterval(this.intervalId)  
           }, 1000);
-        }   
-  },
+        }
+     
+  }, 
+    //检查验证码
+     CheckCaptcha(cap){
+      this.rules[0].Captcha.isBlur = true
+      this.rules[0].Captcha.requires = false
+      if(!cap) {
+        this.captchaMass = this.rules[0].Captcha.massage[0]
+      }else{
+      this.captchaMass=''
+      this.rules[0].Captcha.requires = true
+      this.rules[0].Captcha.isBlur = false
+      }
+      
+
+    },//检测绑定电话号码内容
      CheckPhone(val,Length) {
-        this.rules[0].Phone.isBlur = true
-        this.rules[0].Phone.requires = false
+       
+        this.rules[1].Phone.isBlur = true
+        this.rules[1].Phone.requires = false
          if (!val) {
-           this.phoneMass = this.rules[0].Phone.massage[0] 
+           this.phoneMass = this.rules[1].Phone.massage[0] 
         }else if(val&&val.length<Length) {
-           this.phoneMass = this.rules[0].Phone.massage[1]  
+           this.phoneMass = this.rules[1].Phone.massage[1]  
         }else {
-          this.rules[0].Phone.isBlur = false
+          this.rules[1].Phone.isBlur = false
           this.phoneMass = ''
-           this.rules[0].Phone.requires = true
+           this.rules[1].Phone.requires = true
         }  
-    },
+    },//检查用户账号
       CheckUser(val,Length) {
         this.rules[0].User.isBlur = true
         this.rules[0].User.requires = false
@@ -132,8 +165,10 @@ methods: {
             this.rules[0].User.requires = true
         }  
     },
+    //检查密码
       CheckPass(val,Length) {
         this.rules[0].Pass.isBlur = true
+        //requires为true，则填写内容正确
         this.rules[0].Pass.requires = false
          if (!val) {
            this.passMass = this.rules[0].Pass.massage[0]                   
@@ -146,23 +181,53 @@ methods: {
           
         }  
     },
-    submitLogin(id) { //提交登陆
-      this.$store.dispatch('GetLoginid',id)
+    //登陆
+    submitLogin(id) { 
       const rule = this.rules[0]
-      const Length = Object.keys(rule).length //输入框的数量
+      //输入框的数量
+      const Length = Object.keys(rule).length 
       const Requires = Object.keys(rule).filter(key =>{
-         return rule[key].requires ===true //筛选出正确填写的输入框数组 requires:true
+      //筛选出正确填写的输入框数组 requires:true
+         return rule[key].requires ===true 
         
       })
       if(Requires.length < Length){
-       MessageBox.alert('请输入正确信息')
-      }else if (Requires.length===Length) {  // 所有输入框填写正确才能登陆
-        this.$router.push('/home') //转到首页 
+       
+       // 检查所有输入框信息是否正确
+      }else if (Requires.length===Length) {  
+        const {password,user_name,captcha} = this 
+      let data
+        //密码登陆
+       data = reqpwdlogin({password,user_name,captcha})   
+       data.then((result)=>{
+       
+        //如果code=0,则登陆成功，储存用户信息
+          if(result.code==0) {
+          this.$store.dispatch('GetLoginUser',result)
+          
+          this.$router.push('/profile') 
+          
+          }
+         //如果code=1,则登陆失败
+         if(result.code==1) {
+           this.captchaMass = result.msg
+           //输入框变为红色
+           this.rules[0].Captcha.isBlur = true
+           this.rules[0].Captcha.requires = false
+           MessageBox.alert('请输入正确信息')
+           //图片刷新
+           this.SwitchCaptcha()
+           return
+         }
+      })
+        //转到首页 
+        
       }
-      
-      
-    }
-  
+    },
+          // 点击更换验证图片
+       SwitchCaptcha() {
+         this.$refs.captcha.src=`http://localhost:3000/captcha?time=${Date.now()}`
+       }
       
 },
 //生命周期 - 创建完成（可以访问当前this实例）
@@ -170,7 +235,7 @@ created() {
 },
 //生命周期 - 挂载完成（可以访问DOM元素）
 mounted() {
-
+    
 },
 beforeCreate() {}, //生命周期 - 创建之前
 beforeMount() {}, //生命周期 - 挂载之前
@@ -272,6 +337,12 @@ activated() {}, //如果页面有keep-alive缓存功能，这个函数会触发
     font-size: 12px;
     color: #999;
     margin-top: 10px;
+  }
+  .size-cap {
+    height:48px;
+    position:absolute;
+    top:0;
+    right:0;
   }
   
 </style>

@@ -1,12 +1,19 @@
 import originAxios from 'axios'
+
 import qs from 'qs'
 
-export default function axios(option) {
+
+
+export default function axios(option,data={},type='get') {
 	return new Promise((resolve, reject) => {
+		
+		
 		// 1.创建axios的实例
 		const instance = originAxios.create({
-			baseURL: '',
-			timeout: 5000
+			baseURL: 'http://123.207.32.32:8000/api/wh',
+			timeout: 5000,
+			data:data,
+			method:type
 		});
 
 		// 配置请求和响应拦截

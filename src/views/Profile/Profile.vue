@@ -2,7 +2,9 @@
   <div id="profile">
     <navbar class="nav-bar"><div slot="center">小码哥商城</div></navbar>
     <!--1.单独封装一个组件: 利用slot知识点-->
-    <UserInfo></UserInfo>
+    <UserInfo>
+      <div slot="user-nickname" v-if="User.code==0">{{User.data.name}}</div>
+    </UserInfo>
 
     <!--2.没有单独封装: 不同的地方太多, 需要传过多的参数-->
     <section class="account">
@@ -36,12 +38,16 @@
   import UserInfo from './profilechild/UserInfo'
   import ListView from './profilechild/ListView'
   import navbar from '../../components/common/nav/navbar'
+  import {mapState} from 'vuex'
 
 	export default {
 		name: "Profile",
     components: {
 		  UserInfo, ListView, navbar
     },
+    computed: {
+    ...mapState(['User'])
+},
     data: function () {
 		  return {
 		    orderList: [
@@ -56,6 +62,8 @@
       }
     },
     mounted: function () {
+      
+      
     }
 	}
 </script>
